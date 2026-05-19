@@ -1,0 +1,32 @@
+FROM frappe/erpnext:v16.17.0
+
+ARG NODE_VERSION=24.13.0
+
+USER root
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl xz-utils ca-certificates \
+    && ARCH="$(dpkg --print-architecture)" \
+    && if [ "$ARCH" = "amd64" ]; then NODE_ARCH="x64"; elif [ "$ARCH" = "arm64" ]; then NODE_ARCH="arm64"; else echo "Unsupported arch: $ARCH"; exit 1; fi \
+    && curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -o /tmp/node.tar.xz \
+    && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 \
+    && rm -f /tmp/node.tar.xz \
+    && corepack enable \
+    && corepack prepare yarn@1.22.19 --activate \
+    && printf '%s\n' '#!/bin/sh' 'exec corepack yarn "$@"' > /usr/local/bin/yarn \
+    && printf '%s\n' '#!/bin/sh' 'exec corepack yarn "$@"' > /usr/local/bin/yarnpkg \
+    && chmod +x /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=frappe:frappe custom_apps/hrms /home/frappe/frappe-bench/apps/hrms
+COPY --chown=frappe:frappe custom_apps/org_logistics_control /home/frappe/frappe-bench/apps/org_logistics_control
+
+USER frappe
+
+RUN cd /home/frappe/frappe-bench \
+    && ./env/bin/pip install -e apps/hrms \
+    && ./env/bin/pip install -e apps/org_logistics_control \
+    && if ! grep -qx "hrms" sites/apps.txt; then echo "hrms" >> sites/apps.txt; fi \
+    && if ! grep -qx "org_logistics_control" sites/apps.txt; then echo "org_logistics_control" >> sites/apps.txt; fi \
+    && mkdir -p /home/frappe/frappe-bench/assets/org_logistics_control/js \
+    && cp -f /home/frappe/frappe-bench/apps/org_logistics_control/org_logistics_control/public/js/desk_ui.js /home/frappe/frappe-bench/assets/org_logistics_control/js/desk_ui.js
