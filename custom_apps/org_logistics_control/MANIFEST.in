@@ -1,0 +1,2 @@
+include requirements.txt
+recursive-include org_logistics_control *.json *.py *.js *.css *.html *.txt

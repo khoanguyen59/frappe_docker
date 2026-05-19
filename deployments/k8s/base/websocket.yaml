@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frappe-websocket
+spec:
+  selector:
+    app: frappe-websocket
+  ports:
+    - port: 9000
+      targetPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-websocket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frappe-websocket
+  template:
+    metadata:
+      labels:
+        app: frappe-websocket
+    spec:
+      containers:
+        - name: websocket
+          image: frappe/erpnext:v16.17.0
+          command:
+            - node
+            - /home/frappe/frappe-bench/apps/frappe/socketio.js
+          env:
+            - name: FRAPPE_REDIS_CACHE
+              value: redis://redis-cache:6379
+            - name: FRAPPE_REDIS_QUEUE
+              value: redis://redis-queue:6379
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: sites
+              mountPath: /home/frappe/frappe-bench/sites
+            - name: logs
+              mountPath: /home/frappe/frappe-bench/logs
+      volumes:
+        - name: sites
+          persistentVolumeClaim:
+            claimName: frappe-sites
+        - name: logs
+          persistentVolumeClaim:
+            claimName: frappe-logs

@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: frappe-site-init
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: configurator
+          image: frappe/erpnext:v16.17.0
+          command:
+            - bash
+            - -ec
+            - |
+              ls -1 apps > sites/apps.txt
+              bench set-config -g db_host "$DB_HOST"
+              bench set-config -gp db_port "$DB_PORT"
+              bench set-config -g redis_cache "redis://$REDIS_CACHE"
+              bench set-config -g redis_queue "redis://$REDIS_QUEUE"
+              bench set-config -g redis_socketio "redis://$REDIS_QUEUE"
+              bench set-config -gp socketio_port "$SOCKETIO_PORT"
+              bench --site "$SITE_NAME" list-apps >/dev/null 2>&1 || \
+              bench new-site --mariadb-user-host-login-scope='%' --admin-password="$FRAPPE_ADMIN_PASSWORD" --db-root-username=root --db-root-password="$MYSQL_ROOT_PASSWORD" --install-app erpnext --set-default "$SITE_NAME"
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: DB_PORT
+            - name: REDIS_CACHE
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: REDIS_CACHE
+            - name: REDIS_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: REDIS_QUEUE
+            - name: SOCKETIO_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: SOCKETIO_PORT
+            - name: SITE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: SITE_NAME
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: frappe-secrets
+                  key: mysql-root-password
+            - name: FRAPPE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: frappe-secrets
+                  key: admin-password
+          volumeMounts:
+            - name: sites
+              mountPath: /home/frappe/frappe-bench/sites
+            - name: logs
+              mountPath: /home/frappe/frappe-bench/logs
+      volumes:
+        - name: sites
+          persistentVolumeClaim:
+            claimName: frappe-sites
+        - name: logs
+          persistentVolumeClaim:
+            claimName: frappe-logs

@@ -1,0 +1,37 @@
+name: Deploy Frappe to Kubernetes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      K8S_NAMESPACE: frappe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_BASE64 }}" | base64 -d > ~/.kube/config
+
+      - name: Ensure namespace and secret
+        run: |
+          kubectl create namespace "$K8S_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n "$K8S_NAMESPACE" create secret generic frappe-secrets \
+            --from-literal=mysql-root-password="${{ secrets.MYSQL_ROOT_PASSWORD }}" \
+            --from-literal=admin-password="${{ secrets.FRAPPE_ADMIN_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply manifests
+        run: |
+          kubectl apply -k deployments/k8s/overlays/prod
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n "$K8S_NAMESPACE" rollout status deployment/frappe-backend --timeout=300s
+          kubectl -n "$K8S_NAMESPACE" rollout status deployment/frappe-frontend --timeout=300s
+          kubectl -n "$K8S_NAMESPACE" rollout status deployment/frappe-websocket --timeout=300s

@@ -1,0 +1,18 @@
+{
+  "profiles": [
+    {
+      "company": "Company A",
+      "hide_modules": ["Support", "Assets"],
+      "hide_workspaces": ["Manufacturing", "Support"],
+      "hide_doctypes": ["Issue", "Asset"],
+      "homepage": "Accounting"
+    },
+    {
+      "company": "Company B",
+      "hide_modules": ["Healthcare"],
+      "hide_workspaces": ["Payroll"],
+      "hide_doctypes": ["Salary Slip"],
+      "homepage": "Selling"
+    }
+  ]
+}

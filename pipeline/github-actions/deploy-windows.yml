@@ -1,0 +1,44 @@
+name: Deploy Frappe to Windows Server (Docker Compose)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_APP_DIR: C:/frappe_docker
+      ARCHIVE_NAME: frappe_docker_release.tgz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build deployment archive
+        run: |
+          tar -czf "$ARCHIVE_NAME" deployments pwd.yml
+
+      - name: Copy archive to Windows host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.WINDOWS_SSH_HOST }}
+          username: ${{ secrets.WINDOWS_SSH_USER }}
+          key: ${{ secrets.WINDOWS_SSH_PRIVATE_KEY }}
+          source: ${{ env.ARCHIVE_NAME }}
+          target: C:/Windows/Temp
+
+      - name: Deploy on Windows host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.WINDOWS_SSH_HOST }}
+          username: ${{ secrets.WINDOWS_SSH_USER }}
+          key: ${{ secrets.WINDOWS_SSH_PRIVATE_KEY }}
+          script: |
+            powershell -NoProfile -ExecutionPolicy Bypass -Command "
+              $ErrorActionPreference = 'Stop';
+              New-Item -ItemType Directory -Force -Path '${{ env.REMOTE_APP_DIR }}' | Out-Null;
+              tar -xzf 'C:/Windows/Temp/${{ env.ARCHIVE_NAME }}' -C '${{ env.REMOTE_APP_DIR }}';
+              Set-Location '${{ env.REMOTE_APP_DIR }}/deployments/windows';
+              if (-not (Test-Path '.env')) { Copy-Item '.env.example' '.env' };
+              docker compose -f docker-compose.host.yml --env-file .env up -d --remove-orphans;
+            "

@@ -1,0 +1,42 @@
+name: Deploy Frappe to Linux (Docker Compose)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_APP_DIR: /opt/frappe_docker
+      ARCHIVE_NAME: frappe_docker_release.tgz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build deployment archive
+        run: |
+          tar -czf "$ARCHIVE_NAME" deployments pwd.yml
+
+      - name: Copy archive to Linux host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LINUX_SSH_HOST }}
+          username: ${{ secrets.LINUX_SSH_USER }}
+          key: ${{ secrets.LINUX_SSH_PRIVATE_KEY }}
+          source: ${{ env.ARCHIVE_NAME }}
+          target: /tmp
+
+      - name: Deploy on Linux host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LINUX_SSH_HOST }}
+          username: ${{ secrets.LINUX_SSH_USER }}
+          key: ${{ secrets.LINUX_SSH_PRIVATE_KEY }}
+          script: |
+            set -euo pipefail
+            mkdir -p "$REMOTE_APP_DIR"
+            tar -xzf "/tmp/$ARCHIVE_NAME" -C "$REMOTE_APP_DIR"
+            cd "$REMOTE_APP_DIR/deployments/linux"
+            test -f .env || cp .env.example .env
+            docker compose -f docker-compose.host.yml --env-file .env up -d --remove-orphans

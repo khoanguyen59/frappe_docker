@@ -1,0 +1,40 @@
+"""Example server-side boot hook for per-company UI profile."""
+
+import frappe
+
+
+def load_org_ui_profile(bootinfo):
+    company = frappe.defaults.get_user_default("Company")
+    if not company:
+        bootinfo.org_ui_profile = {}
+        return
+
+    # Example with a custom DocType "Org UI Profile".
+    # You can also read from Site Config or JSON file.
+    profile = frappe.get_all(
+        "Org UI Profile",
+        filters={"company": company, "enabled": 1},
+        fields=["name", "hide_modules", "hide_workspaces", "hide_doctypes", "homepage"],
+        limit=1,
+    )
+
+    if not profile:
+        bootinfo.org_ui_profile = {}
+        return
+
+    row = profile[0]
+    bootinfo.org_ui_profile = {
+        "company": company,
+        "hide_modules": _to_list(row.get("hide_modules")),
+        "hide_workspaces": _to_list(row.get("hide_workspaces")),
+        "hide_doctypes": _to_list(row.get("hide_doctypes")),
+        "homepage": row.get("homepage") or "",
+    }
+
+
+def _to_list(value):
+    if not value:
+        return []
+    if isinstance(value, list):
+        return value
+    return [item.strip() for item in str(value).split(",") if item.strip()]

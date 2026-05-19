@@ -1,0 +1,244 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:LJOB-.#####",
+ "creation": "2026-05-14 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "cargo_reference",
+  "customer",
+  "supplier",
+  "order_status",
+  "delivery_status",
+  "payment_status",
+  "currency",
+  "planned_departure",
+  "planned_arrival",
+  "section_services",
+  "services",
+  "section_totals",
+  "total_sell_amount",
+  "total_buy_amount",
+  "total_margin",
+  "margin_percent",
+  "column_break_docs",
+  "sales_order",
+  "purchase_order",
+  "sales_invoice",
+  "purchase_invoice",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cargo_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cargo Reference"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "default": "draft",
+   "fieldname": "order_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Order Status",
+   "options": "draft\npackaging\nsummary\npayment\ncompleted\npending\non_hold\ncancelled"
+  },
+  {
+   "default": "pending",
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Delivery Status",
+   "options": "pending\ndelivered_on_stand\npickup_of_empty_packages\nplacement_of_empty_packages_on_stand\npickup_of_packages_on_stand\npackages_picked_up_by_the_transport_company"
+  },
+  {
+   "default": "awaiting_payment",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Status",
+   "options": "draft\nawaiting_payment\naccepted\npaid\ncancelled\non_hold\nrefused\npending_approval"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "planned_departure",
+   "fieldtype": "Date",
+   "label": "Planned Departure"
+  },
+  {
+   "fieldname": "planned_arrival",
+   "fieldtype": "Date",
+   "label": "Planned Arrival"
+  },
+  {
+   "fieldname": "section_services",
+   "fieldtype": "Section Break",
+   "label": "Service Lines"
+  },
+  {
+   "fieldname": "services",
+   "fieldtype": "Table",
+   "label": "Services",
+   "options": "Logistics Job Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_totals",
+   "fieldtype": "Section Break",
+   "label": "Financial Summary"
+  },
+  {
+   "fieldname": "total_sell_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Sell",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_buy_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Buy",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_margin",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Margin",
+   "read_only": 1
+  },
+  {
+   "fieldname": "margin_percent",
+   "fieldtype": "Percent",
+   "label": "Margin %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_docs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Org Logistics Control",
+ "name": "Logistics Job",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "cargo_reference",
+ "track_changes": 1
+}

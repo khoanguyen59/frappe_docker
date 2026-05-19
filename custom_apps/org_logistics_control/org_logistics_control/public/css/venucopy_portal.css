@@ -1,0 +1,139 @@
+.venucopy-wrap {
+  max-width: 1200px;
+  margin: 24px auto 64px;
+  padding: 0 16px;
+  font-family: "Satoshi", "Manrope", "Segoe UI", sans-serif;
+}
+
+.venucopy-hero {
+  background: linear-gradient(123.49deg, #e3e8fe 4.93%, #faf3eb 105.81%);
+  border: 1px solid #d8ddf7;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 21px 47px rgba(80, 85, 165, 0.1);
+}
+
+.venucopy-hero h1 {
+  margin: 0;
+  font-size: 30px;
+  color: #22284b;
+}
+
+.venucopy-hero p {
+  margin-top: 10px;
+  color: #4c547c;
+}
+
+.venucopy-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.venucopy-btn {
+  display: inline-block;
+  background: #5055a5;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+}
+
+.venucopy-btn-secondary {
+  background: #fff;
+  color: #5055a5;
+  border: 1px solid #5055a5;
+}
+
+.venucopy-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.venucopy-kpi {
+  background: #fff;
+  border: 1px solid #d7dcf6;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.venucopy-kpi-label {
+  color: #5f6892;
+  font-size: 13px;
+}
+
+.venucopy-kpi-value {
+  color: #1f2550;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 5px;
+}
+
+.venucopy-table-card {
+  margin-top: 14px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #d7dcf6;
+  overflow: hidden;
+}
+
+.venucopy-table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eceffd;
+}
+
+.venucopy-table-head h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2550;
+}
+
+#venucopy-company-tag {
+  color: #5055a5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.venucopy-table-wrap {
+  overflow-x: auto;
+}
+
+.venucopy-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.venucopy-table th,
+.venucopy-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f2fb;
+  font-size: 13px;
+}
+
+.venucopy-table th {
+  color: #606b99;
+  font-weight: 600;
+}
+
+.venucopy-table td {
+  color: #202645;
+}
+
+@media (max-width: 800px) {
+  .venucopy-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .venucopy-hero h1 {
+    font-size: 24px;
+  }
+}

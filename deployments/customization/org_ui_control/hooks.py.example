@@ -1,0 +1,11 @@
+# Add this in your custom app hooks.py
+
+app_name = "org_ui_control"
+app_title = "Organization UI Control"
+app_publisher = "Your Team"
+app_version = "0.0.1"
+
+boot_session = "org_ui_control.boot.load_org_ui_profile"
+
+# Include Desk script globally
+app_include_js = ["/assets/org_ui_control/js/desk_ui.js"]

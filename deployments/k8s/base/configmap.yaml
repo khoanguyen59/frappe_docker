@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frappe-config
+data:
+  FRAPPE_IMAGE: frappe/erpnext:v16.17.0
+  DB_HOST: mariadb
+  DB_PORT: "3306"
+  REDIS_CACHE: redis-cache:6379
+  REDIS_QUEUE: redis-queue:6379
+  SOCKETIO_PORT: "9000"
+  SITE_NAME: frontend

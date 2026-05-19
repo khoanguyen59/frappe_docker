@@ -1,12 +1,6 @@
-x-frappe-custom-image: &frappe_custom_image
-  image: local/org-logistics-erpnext:v16.17.0
-  build:
-    context: .
-    dockerfile: images/local-org/Containerfile
-
 services:
   backend:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -16,15 +10,15 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
     ports:
-      - "8002:8000"
+      - "${BACKEND_HOST_PORT:-8002}:8000"
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      MYSQL_ROOT_PASSWORD: admin
-      MARIADB_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
   configurator:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -35,9 +29,7 @@ services:
       - -c
     command:
       - >
-        ls -1 /home/frappe/frappe-bench/apps > /home/frappe/frappe-bench/sites/apps.txt;
-        mkdir -p /home/frappe/frappe-bench/sites/assets/org_logistics_control/js;
-        cp -f /home/frappe/frappe-bench/apps/org_logistics_control/org_logistics_control/public/js/desk_ui.js /home/frappe/frappe-bench/sites/assets/org_logistics_control/js/desk_ui.js;
+        ls -1 apps > sites/apps.txt;
         bench set-config -g db_host $$DB_HOST;
         bench set-config -gp db_port $$DB_PORT;
         bench set-config -g redis_cache "redis://$$REDIS_CACHE";
@@ -55,7 +47,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   create-site:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -73,22 +65,20 @@ services:
         wait-for-it -t 120 redis-cache:6379;
         wait-for-it -t 120 redis-queue:6379;
         export start=`date +%s`;
-        until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] && \
-          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
+        until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] &&
+          [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] &&
           [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_queue // empty"` ]];
         do
           echo "Waiting for sites/common_site_config.json to be created";
           sleep 5;
           if (( `date +%s`-start > 120 )); then
             echo "could not find sites/common_site_config.json with required keys";
-            exit 1
+            exit 1;
           fi
         done;
         echo "sites/common_site_config.json found";
-        if [ ! -d sites/frontend ]; then
-          bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=admin --install-app erpnext --set-default frontend;
-        fi;
-        bench --site frontend list-apps | grep -qx org_logistics_control || bench --site frontend install-app org_logistics_control;
+        bench --site frontend list-apps >/dev/null 2>&1 ||
+        bench new-site --mariadb-user-host-login-scope='%' --admin-password=${FRAPPE_ADMIN_PASSWORD} --db-root-username=root --db-root-password=${MYSQL_ROOT_PASSWORD} --install-app erpnext --set-default frontend;
 
   db:
     image: mariadb:11.8
@@ -108,15 +98,15 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MARIADB_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
     ports:
-      - "3308:3306"
+      - "${DB_HOST_PORT:-3308}:3306"
 
   frontend:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     depends_on:
@@ -139,10 +129,10 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
     ports:
-      - "8082:8080"
+      - "${FRONTEND_HOST_PORT:-8082}:8080"
 
   queue-long:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -161,7 +151,7 @@ services:
       FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
 
   queue-short:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -189,7 +179,7 @@ services:
     volumes:
       - redis-queue-data:/data
     ports:
-      - "6381:6379"
+      - "${REDIS_QUEUE_HOST_PORT:-6381}:6379"
 
   redis-cache:
     image: redis:6.2-alpine
@@ -199,10 +189,10 @@ services:
       restart_policy:
         condition: on-failure
     ports:
-      - "6382:6379"
+      - "${REDIS_CACHE_HOST_PORT:-6382}:6379"
 
   scheduler:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -216,7 +206,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   websocket:
-    <<: *frappe_custom_image
+    image: ${FRAPPE_IMAGE}
     networks:
       - frappe_network
     deploy:
@@ -232,7 +222,7 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
     ports:
-      - "9002:9000"
+      - "${WEBSOCKET_HOST_PORT:-9002}:9000"
 
 volumes:
   db-data:

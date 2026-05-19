@@ -1,0 +1,45 @@
+// Example Desk-side UI toggles driven by bootinfo.org_ui_profile.
+// This is UX control only. Keep real permissions on server side.
+
+frappe.ready(() => {
+  const p = frappe.boot.org_ui_profile || {};
+  if (!Object.keys(p).length) return;
+
+  hideWorkspaceCards(p.hide_workspaces || []);
+  hideModuleCards(p.hide_modules || []);
+
+  if (p.homepage) {
+    frappe.boot.home_page = p.homepage;
+  }
+});
+
+function hideWorkspaceCards(names) {
+  if (!Array.isArray(names) || !names.length) return;
+
+  const norm = new Set(names.map((x) => (x || "").toLowerCase()));
+  document.querySelectorAll('[data-page-route="Workspaces"] .widget.links-widget-box').forEach((card) => {
+    const title = (card.querySelector('.widget-title, .h4, .title-text')?.textContent || "").trim().toLowerCase();
+    if (norm.has(title)) {
+      card.style.display = "none";
+    }
+  });
+}
+
+function hideModuleCards(names) {
+  if (!Array.isArray(names) || !names.length) return;
+
+  const norm = new Set(names.map((x) => (x || "").toLowerCase()));
+  document.querySelectorAll('.module-card, .workspace-card, [data-module-name]').forEach((node) => {
+    const name = (
+      node.getAttribute('data-module-name') ||
+      node.querySelector('.module-title, .title-text, .h4')?.textContent ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+    if (norm.has(name)) {
+      node.style.display = "none";
+    }
+  });
+}

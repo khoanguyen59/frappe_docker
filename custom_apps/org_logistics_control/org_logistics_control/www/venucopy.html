@@ -1,0 +1,59 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Venucopy{% endblock %}
+
+{% block head_include %}
+<link rel="stylesheet" href="/assets/org_logistics_control/css/venucopy_portal.css">
+{% endblock %}
+
+{% block page_content %}
+<div class="venucopy-wrap">
+  <section class="venucopy-hero">
+    <h1>Venucopy Logistics Portal</h1>
+    {% if is_guest %}
+    <p>Please sign in to access your organization portal.</p>
+    <a class="venucopy-btn" href="/login?redirect-to=%2Fvenucopy">Sign In</a>
+    {% else %}
+    <p>Welcome {{ user }}{% if company %} - Company: {{ company }}{% endif %}</p>
+    <div class="venucopy-actions">
+      <a class="venucopy-btn" href="/app/logistics-job">Open Logistics Jobs</a>
+      <a class="venucopy-btn venucopy-btn-secondary" href="/app">Open Desk</a>
+    </div>
+    {% endif %}
+  </section>
+
+  {% if not is_guest %}
+  <section class="venucopy-kpis" id="venucopy-kpis"></section>
+
+  <section class="venucopy-table-card">
+    <div class="venucopy-table-head">
+      <h2>Recent Logistics Jobs</h2>
+      <span id="venucopy-company-tag"></span>
+    </div>
+    <div class="venucopy-table-wrap">
+      <table class="venucopy-table" id="venucopy-jobs-table">
+        <thead>
+          <tr>
+            <th>Job</th>
+            <th>Reference</th>
+            <th>Customer</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Delivery</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+{% if not is_guest %}
+<script src="/assets/org_logistics_control/js/venucopy_portal.js"></script>
+{% endif %}
+{% endblock %}

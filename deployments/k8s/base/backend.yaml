@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frappe-backend
+spec:
+  selector:
+    app: frappe-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frappe-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frappe-backend
+  template:
+    metadata:
+      labels:
+        app: frappe-backend
+    spec:
+      containers:
+        - name: backend
+          image: frappe/erpnext:v16.17.0
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: frappe-config
+                  key: DB_PORT
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: frappe-secrets
+                  key: mysql-root-password
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: frappe-secrets
+                  key: mysql-root-password
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: sites
+              mountPath: /home/frappe/frappe-bench/sites
+            - name: logs
+              mountPath: /home/frappe/frappe-bench/logs
+      volumes:
+        - name: sites
+          persistentVolumeClaim:
+            claimName: frappe-sites
+        - name: logs
+          persistentVolumeClaim:
+            claimName: frappe-logs
